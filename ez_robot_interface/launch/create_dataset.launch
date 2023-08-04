@@ -1,0 +1,10 @@
+<launch>
+
+    <!-- Camera Streamer -->
+    <node pkg="ez_robot_interface" type="camera_streamer.py" name="camera_streamer" output="screen" required="true"/>
+    <!-- Image Dataset Creator -->
+    <node pkg="ez_robot_interface" type="image_dataset_creator.py" name="image_dataset_creator" output="screen">
+        <param name="save_directory" value="~/Dataset"/>
+    </node>
+  
+</launch>
