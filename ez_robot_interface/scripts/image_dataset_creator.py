@@ -33,7 +33,7 @@ class ImageDatasetCreator:
         rospy.init_node('image_dataset_creator', anonymous=True)
 
         # Directory to save the images
-        self.save_dir = rospy.get_param('~save_directory', '~/Dataset')
+        self.save_dir = os.path.expanduser(rospy.get_param('~save_directory', '~/Dataset'))
         
         # Check if the directory exists, if not, create it
         if not os.path.exists(self.save_dir):
