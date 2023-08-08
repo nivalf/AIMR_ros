@@ -1,20 +1,17 @@
-import onnxruntime as ort
+import torch
 
-# Load the ONNX model
-sess = ort.InferenceSession("../models/assembly_system_detector.onnx", providers=['CUDAExecutionProvider', 'CPUExecutionProvider'])
+model_path = "../models/assembly_system_detector.pt"
+model = torch.load(model_path)
+model.eval() # Sets the model to evaluation mode
 
-# Get the name of the first input of the model
-input_name = sess.get_inputs()[0].name
-print(f"Input Name: {input_name}")
+print(model)
 
-# Print the input shape
-input_shape = sess.get_inputs()[0].shape
-print(f"Input Shape: {input_shape}")
+dummy_input = torch.randn(1, 3, 320, 240) # Example input shape
+with torch.no_grad():
+    dummy_output = model(dummy_input)
 
-# Get the name of the first output of the model
-output_name = sess.get_outputs()[0].name
-print(f"Output Name: {output_name}")
+print("Input shape:", dummy_input.shape)
+print("Output shape:", dummy_output.shape)
 
-# Print the output shape
-output_shape = sess.get_outputs()[0].shape
-print(f"Output Shape: {output_shape}")
+for name, param in model.named_parameters():
+    print(name, param.size())
