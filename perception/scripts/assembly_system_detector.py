@@ -1,15 +1,12 @@
 #!/usr/bin/env python3
 
-import rospy
-import torch
-import numpy as np
 import cv2
+import rospy
+from cv_bridge import CvBridge, CvBridgeError
 from sensor_msgs.msg import Image
 from std_msgs.msg import String
-from cv_bridge import CvBridge, CvBridgeError
-from torchvision import transforms
 from ultralytics import YOLO
-from PIL import Image as PILImage
+
 
 class AssemblySystemDetector:
     """

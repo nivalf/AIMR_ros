@@ -9,7 +9,7 @@ import os
 
 class ImageStreamer:
     """
-    ImageStreamer class to read images from a directory and publish them as ROS messages.
+    ROS Node: ImageStreamer class to read images from a directory and publish them as ROS messages.
 
     Attributes:
         image_paths (list): List of paths to image files in the directory.
