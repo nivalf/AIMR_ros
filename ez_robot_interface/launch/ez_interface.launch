@@ -5,7 +5,7 @@
     <!-- Camera Streamer -->
     <node pkg="ez_robot_interface" type="camera_streamer.py" name="camera_streamer" output="screen" required="true"/>
     <!-- EZ Command Action Server -->
-    <node pkg="ez_robot_interface" type="ez_command_action_server.py" name="ez_command_action_server" output="screen" required="true">
+    <node pkg="ez_robot_interface" type="ez_command_server.py" name="ez_command_action_server" output="screen" required="true">
         <param name="ARC_Host_IP" value="$(arg ARC_Host_IP)"/>
         <param name="ARC_Host_Port" value="$(arg ARC_Host_Port)"/>
     </node>

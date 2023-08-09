@@ -1,0 +1,8 @@
+<launch>
+    <!-- EZ Command Action Server -->
+    <include file="$(find ez_robot_interface)/launch/ez_interface.launch" />
+
+    <!-- Test Node -->
+    <node pkg="navigation" type="navigation_server_test.py" name="nav" output="screen"/>
+  
+</launch>

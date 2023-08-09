@@ -5,7 +5,7 @@ import actionlib
 import socket
 from ez_robot_interface.msg import SendEZCommandAction, SendEZCommandResult
 
-class EZCommandActionServer:
+class EZCommandServer:
     """
     A ROS Action Server that serves as an interface to a EZ Robot's 'TCP Sript Server Raw' skill in ARC.
 
@@ -19,7 +19,7 @@ class EZCommandActionServer:
     :param max_retries: Maximum number of connection retries to the TCP server. (Optional)
 
     Usage:
-        server = EZCommandActionServer('192.168.0.11', 8080)
+        server = EZCommandServer('192.168.0.11', 8080)
     """
 
     def __init__(self, ip, port, max_retries=5):
@@ -58,7 +58,7 @@ class EZCommandActionServer:
 
     def execute_cb(self, goal):
         """Executes the action by sending the command to the TCP server and returning the response."""
-        command = goal.command
+        command = goal.command + '\r\n'
         rospy.loginfo(f"Sending command: {command}")
 
         if self.s is None:
@@ -86,9 +86,10 @@ class EZCommandActionServer:
             self.s.close()
 
 if __name__ == '__main__':
-    ARC_Host_IP = rospy.get_param('~ARC_Host_IP')
-    ARC_Host_Port = rospy.get_param('~ARC_Host_Port')
+    # ARC_Host_IP = rospy.get_param('~ARC_Host_IP')
+    # ARC_Host_Port = rospy.get_param('~ARC_Host_Port')
 
     rospy.init_node('ez_command_action_server')
-    server = EZCommandActionServer(ARC_Host_IP, ARC_Host_Port)
+    # server = EZCommandServer(ARC_Host_IP, ARC_Host_Port)
+    server = EZCommandServer('192.168.0.11', 8080)
     rospy.spin()
