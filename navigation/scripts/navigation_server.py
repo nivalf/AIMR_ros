@@ -58,6 +58,7 @@ class NavigationServer:
             while not self.server.is_preempt_requested() and not rospy.is_shutdown():
                 if self.state == self.SCANNING:
                     feedback.status = "Scanning for assembly system."
+                    self.send_ez_command('SayEZB("Scanning for assembly system.")')
                     self.send_ez_command('Left()')
 
                 elif self.state == self.MOVING_FORWARD:

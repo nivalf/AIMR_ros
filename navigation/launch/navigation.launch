@@ -2,7 +2,9 @@
     <!-- EZ Command Action Server -->
     <include file="$(find ez_robot_interface)/launch/ez_interface.launch" />
 
-    <!-- Test Node -->
-    <node pkg="navigation" type="navigation_server_test.py" name="nav" output="screen"/>
+    <!-- Navigation Server -->
+    <node pkg="navigation" type="navigation_server.py" name="navigation_server" output="screen" required="True"/>
+    <!-- Navigation Client -->
+    <node pkg="navigation" type="navigation_client.py" name="navigation_client" output="screen"/>
   
 </launch>
