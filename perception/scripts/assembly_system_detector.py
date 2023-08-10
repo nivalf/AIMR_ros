@@ -6,6 +6,7 @@ from cv_bridge import CvBridge, CvBridgeError
 from sensor_msgs.msg import Image
 from std_msgs.msg import String
 from ultralytics import YOLO
+from helpers import process_result
 
 
 class AssemblySystemDetector:
@@ -49,13 +50,16 @@ class AssemblySystemDetector:
             preprocessed_image = self.preprocess_image(cv_image)
 
             # Run inference 
-            results = self.model(preprocessed_image)  # results list
+            # Set confidence threshold (default 0.25) and IoU threshold (default 0.7)
+            results = self.model.predict(preprocessed_image, conf=0.8, iou=0.7)  # results list
 
-            # Show the results
-            for r in results:
-                im_array = r.plot()  # plot a BGR numpy array of predictions
-                # image_with_boxes = PILImage.fromarray(im_array[..., ::-1])  # RGB PIL image
-                # image_with_boxes.show()
+            # Since a single image is passed, the result will be a list of length 1
+            result = results[0]
+
+            im_array = result.plot()  # plot a BGR numpy array of predictions
+            detection_result = process_result(result)
+
+            rospy.loginfo(f'Detection Result: \n {detection_result}')
 
             # Publish the detection result
             self.detection_result_pub.publish(String(data="detection result"))
