@@ -23,14 +23,14 @@ class NavigationServer:
         """
         Initializes the NavigationServer and sets up the FSM logic.
         """
-        self.server = actionlib.SimpleActionServer('navigate_to_assembly', NavigateToAssemblyAction, self.execute, False)
+        self.server = actionlib.SimpleActionServer('navigate_to_assembly', NavigateToAssemblyAction, self.execute_cb, False)
         self.server.start()
 
         self.ez_command_client = actionlib.SimpleActionClient('sendEZCommand', SendEZCommandAction)
         self.ez_command_client.wait_for_server()
 
         self.detection_subscriber = rospy.Subscriber('/assembly_system_detector/results', String, self.detection_callback)
-        self.state = self.SCANNING
+        self.set_state(self.SCANNING)
         self.detection_count = 0
 
     def detection_callback(self, msg):
@@ -39,14 +39,14 @@ class NavigationServer:
         """
         if msg.data == 'detected':
             if self.state == self.SCANNING:
-                self.state = self.MOVING_FORWARD
+                self.set_state(self.MOVING_FORWARD)
             self.detection_count = 0
         else:
             self.detection_count += 1
             if self.state == self.MOVING_FORWARD and self.detection_count >= 5:
-                self.state = self.SCANNING
+                self.set_state(self.SCANNING)
 
-    def execute(self, goal):
+    def execute_cb(self, goal):
         """
         Execution logic for the navigation action using FSM.
         Implements navigation process and sends feedback.
@@ -58,16 +58,12 @@ class NavigationServer:
             while not self.server.is_preempt_requested() and not rospy.is_shutdown():
                 if self.state == self.SCANNING:
                     feedback.status = "Scanning for assembly system."
-                    self.send_ez_command('SayEZB("Scanning for assembly system.")')
-                    self.send_ez_command('Left()')
 
                 elif self.state == self.MOVING_FORWARD:
                     feedback.status = "Assembly system detected. Moving forward."
-                    self.send_ez_command('Forward()')
 
                 elif self.state == self.STOPPED:
                     feedback.status = "Navigation stopped."
-                    self.send_ez_command('Stop()')
                     break
 
                 self.server.publish_feedback(feedback)
@@ -91,6 +87,31 @@ class NavigationServer:
         goal.command = command
         self.ez_command_client.send_goal(goal)
         self.ez_command_client.wait_for_result()
+
+    def set_state(self, state):
+        """
+        Sets the state of the FSM.
+        Transition function: Add logic that should be 
+        executed only at state transitions here.
+        """
+        if state == self.SCANNING:
+            self.send_ez_command('SayEZB("Hmm, where is the assembly system?")')
+            self.send_ez_command('controlCommand("Auto Position", "AutoPositionAction", "Thinking")')
+            rospy.sleep(4)
+            self.send_ez_command('SayEZB("Scanning")')
+            self.send_ez_command('Left()')
+
+        elif state == self.MOVING_FORWARD:
+            self.send_ez_command('SayEZB("Found it.")')
+            self.send_ez_command('controlCommand("Auto Position", "AutoPositionAction", "Point")')
+            rospy.sleep(2)
+            self.send_ez_command('Forward()')
+
+        elif state == self.STOPPED:
+            self.send_ez_command('SayEZB("Reached.")')
+            self.send_ez_command('Stop()')
+
+        self.state = state
 
 if __name__ == '__main__':
     rospy.init_node('navigation_server')
