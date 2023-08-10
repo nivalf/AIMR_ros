@@ -7,6 +7,7 @@ from sensor_msgs.msg import Image
 from std_msgs.msg import String
 from ultralytics import YOLO
 from helpers import process_result
+from perception.msg import DetectionResult
 
 
 class AssemblySystemDetector:
@@ -34,7 +35,7 @@ class AssemblySystemDetector:
         self.image_sub = rospy.Subscriber("ez_robot_camera/image_raw", Image, self.callback)
 
         # Publishers for the detection result and image with bounding boxes
-        self.detection_result_pub = rospy.Publisher("assembly_system_detector/results", String, queue_size=10)
+        self.detection_result_pub = rospy.Publisher("assembly_system_detector/results", DetectionResult, queue_size=10)
         self.image_with_boxes_pub = rospy.Publisher("assembly_system_detector/image_with_inference", Image, queue_size=10)
 
     def preprocess_image(self, image):
@@ -59,10 +60,18 @@ class AssemblySystemDetector:
             im_array = result.plot()  # plot a BGR numpy array of predictions
             detection_result = process_result(result)
 
+            # Create the DetectionResult message object
+            detection_result_msg = DetectionResult()
+            detection_result_msg.detected = detection_result['detected']
+            detection_result_msg.max_area = detection_result['max_area']
+            detection_result_msg.num_boxes = detection_result['num_boxes']
+            detection_result_msg.confidence = detection_result['confidence']
+            detection_result_msg.percentage_cover = detection_result['percentage_cover']
+
             rospy.loginfo(f'Detection Result: \n {detection_result}')
 
             # Publish the detection result
-            self.detection_result_pub.publish(String(data="detection result"))
+            self.detection_result_pub.publish(detection_result_msg)
             # Publish the image with bounding boxes
             self.image_with_boxes_pub.publish(self.bridge.cv2_to_imgmsg(im_array, "bgr8"))
         except CvBridgeError as e:
