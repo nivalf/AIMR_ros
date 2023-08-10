@@ -34,8 +34,8 @@ class NavigationClient:
             goal = NavigateToAssemblyGoal()
             # You can set any specific parameters related to the navigation goal here
 
-            rospy.loginfo("Sending navigation goal...")
             self.client.send_goal(goal, feedback_cb=self.feedback_callback)
+            rospy.loginfo("Navigation Goal Sent.")
 
             # Wait for the result (blocking call)
             self.client.wait_for_result()

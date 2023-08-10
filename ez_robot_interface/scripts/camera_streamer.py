@@ -11,7 +11,7 @@ class CameraStreamer:
 
     def __init__(self):
         self.bridge = CvBridge()
-        self.image_pub = rospy.Publisher("ez_robot_camera/image_raw", Image, queue_size=10)
+        self.image_pub = rospy.Publisher("ez_robot_camera/image_raw", Image, queue_size=1)
         self.camera_url = "http://192.168.0.11/CameraImage.jpg?password=admin&c=Camera"
 
     def fetch_and_publish(self):
@@ -35,12 +35,12 @@ class CameraStreamer:
 
 
     def run(self):
-        rate = rospy.Rate(10)  # 10 Hz
+        rate = rospy.Rate(5)  # 10 Hz
         while not rospy.is_shutdown():
             self.fetch_and_publish()
             rate.sleep()
 
 if __name__ == '__main__':
-    rospy.init_node('camera_streamer', anonymous=True)
+    rospy.init_node('ez_camera_streamer', anonymous=True)
     streamer = CameraStreamer()
     streamer.run()

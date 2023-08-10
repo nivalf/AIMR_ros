@@ -1,10 +1,19 @@
 <launch>
+    <arg name="model_path" default="$(find perception)/models/assembly_system_detector.pt" />
+
     <!-- EZ Command Action Server -->
     <include file="$(find ez_robot_interface)/launch/ez_interface.launch" />
+
+
+    <!-- Assembly System Detector -->
+    <node pkg="perception" type="assembly_system_detector.py" name="assembly_system_detector" output="screen" required="True">
+        <param name="model_path" value="$(arg model_path)"/>
+    </node>
 
     <!-- Navigation Server -->
     <node pkg="navigation" type="navigation_server.py" name="navigation_server" output="screen" required="True"/>
     <!-- Navigation Client -->
     <node pkg="navigation" type="navigation_client.py" name="navigation_client" output="screen"/>
+
   
 </launch>

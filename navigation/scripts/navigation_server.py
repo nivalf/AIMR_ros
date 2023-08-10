@@ -2,9 +2,9 @@
 
 import rospy
 import actionlib
-from std_msgs.msg import String
 from navigation.msg import NavigateToAssemblyAction, NavigateToAssemblyFeedback, NavigateToAssemblyResult
 from ez_robot_interface.msg import SendEZCommandGoal, SendEZCommandAction
+from perception.msg import DetectionResult
 
 class NavigationServer:
     """
@@ -25,21 +25,24 @@ class NavigationServer:
         """
         self.server = actionlib.SimpleActionServer('navigate_to_assembly', NavigateToAssemblyAction, self.execute_cb, False)
         self.server.start()
+        self.state = self.SCANNING
 
         self.ez_command_client = actionlib.SimpleActionClient('sendEZCommand', SendEZCommandAction)
         self.ez_command_client.wait_for_server()
 
-        self.detection_subscriber = rospy.Subscriber('/assembly_system_detector/results', String, self.detection_callback)
-        self.set_state(self.SCANNING)
+        self.detection_subscriber = rospy.Subscriber('/assembly_system_detector/result', DetectionResult, self.resultdetection_cb)
         self.detection_count = 0
 
-    def detection_callback(self, msg):
+    def resultdetection_cb(self, msg):
         """
         Callback for assembly system detection. Updates FSM state based on detection status.
         """
-        if msg.data == 'detected':
+        rospy.loginfo(f"Detection result: {msg}")
+        if msg.detected == True:
             if self.state == self.SCANNING:
                 self.set_state(self.MOVING_FORWARD)
+            elif self.state == self.MOVING_FORWARD and msg.percentage_cover > 75:
+                self.set_state(self.STOPPED)
             self.detection_count = 0
         else:
             self.detection_count += 1
@@ -53,6 +56,12 @@ class NavigationServer:
         """
         feedback = NavigateToAssemblyFeedback()
         result = NavigateToAssemblyResult()
+
+        self.send_ez_command('SayEZB("Hmm, where is the assembly system?")')
+        self.send_ez_command('controlCommand("Auto Position", "AutoPositionAction", "Thinking")')
+        rospy.sleep(4)
+
+        self.set_state(self.SCANNING)
 
         try:
             while not self.server.is_preempt_requested() and not rospy.is_shutdown():
@@ -95,9 +104,6 @@ class NavigationServer:
         executed only at state transitions here.
         """
         if state == self.SCANNING:
-            self.send_ez_command('SayEZB("Hmm, where is the assembly system?")')
-            self.send_ez_command('controlCommand("Auto Position", "AutoPositionAction", "Thinking")')
-            rospy.sleep(4)
             self.send_ez_command('SayEZB("Scanning")')
             self.send_ez_command('Left()')
 
