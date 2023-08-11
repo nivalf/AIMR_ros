@@ -5,7 +5,7 @@ import rospy
 from cv_bridge import CvBridge, CvBridgeError
 from sensor_msgs.msg import Image
 from ultralytics import YOLO
-from helpers import process_result
+from helpers import inference
 from perception.msg import DetectionResult
 
 
@@ -57,7 +57,7 @@ class AssemblySystemDetector:
             result = results[0]
 
             im_array = result.plot()  # plot a BGR numpy array of predictions
-            detection_result = process_result(result)
+            detection_result = inference.process_result(result)
 
             rospy.loginfo(f'Detection Result: \n {result.boxes.data}')
 

@@ -5,7 +5,7 @@ import rospy
 from cv_bridge import CvBridge, CvBridgeError
 from sensor_msgs.msg import Image
 from ultralytics import YOLO
-from helpers import process_result
+from helpers import inference
 from perception.msg import DetectionResult
 
 
@@ -14,7 +14,7 @@ class AssemblySystemDetector:
     ROS node for detecting assembly systems in images using a trained PyTorch model.
 
     Subscribes to:
-    - /ez_robot_camera/image_raw (sensor_msgs/Image): Raw images from the camera.
+    - camera/color/image_raw" (sensor_msgs/Image): Raw images from the camera of turtlebot.
 
     Publishes to:
     - /assembly_system_detector/result (std_msgs/String): Detection result as a string.
@@ -31,7 +31,7 @@ class AssemblySystemDetector:
         self.bridge = CvBridge()
 
         # Subscribe to the camera topic
-        self.image_sub = rospy.Subscriber("ez_robot_camera/image_raw", Image, self.callback)
+        self.image_sub = rospy.Subscriber("camera/color/image_raw", Image, self.callback)
 
         # Publishers for the detection result and image with bounding boxes
         self.detection_result_pub = rospy.Publisher("assembly_system_detector/result", DetectionResult, queue_size=1)
@@ -57,7 +57,7 @@ class AssemblySystemDetector:
             result = results[0]
 
             im_array = result.plot()  # plot a BGR numpy array of predictions
-            detection_result = process_result(result)
+            detection_result = inference.process_result(result)
 
             rospy.loginfo(f'Detection Result: \n {result.boxes.data}')
 
