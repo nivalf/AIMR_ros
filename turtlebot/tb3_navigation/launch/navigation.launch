@@ -1,6 +1,8 @@
 <launch>
     <arg name="model_path" default="$(find perception)/models/assembly_system_detector.pt" />
     <arg name="model" default="$(env TURTLEBOT3_MODEL)" doc="model type [burger, waffle, waffle_pi]"/>
+
+    <arg name="stop_distance" default="0.3" doc="stop distance from goal"/>
     
     <!-- Turtlebot -->
     <include file="$(find turtlebot3_bringup)/launch/turtlebot3_remote.launch">
@@ -17,9 +19,11 @@
     </node>
 
     <!-- Navigation Server -->
-    <node pkg="navigation" type="navigation_server.py" name="navigation_server" output="screen" required="True"/>
+    <node pkg="tb3_navigation" type="navigation_server.py" name="navigation_server" output="screen" required="True">
+        <param name="stop_distance" value="$(arg stop_distance)"/>
+    </node>
     <!-- Navigation Client -->
-    <node pkg="navigation" type="navigation_client.py" name="navigation_client" output="screen"/>
+    <node pkg="tb3_navigation" type="navigation_client.py" name="navigation_client" output="screen"/>
 
   
 </launch>

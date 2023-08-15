@@ -57,14 +57,14 @@ class Tb3Odometry(object):
 class Tb3LaserScan(object):
     # Get the min_distance and the direction
     def get_closest_object_details(self, ranges):
-        left_arc = ranges[0:30]
-        right_arc = ranges[-30:]
+        left_arc = ranges[0:45]
+        right_arc = ranges[-45:]
         front_arc = np.concatenate((left_arc[::-1], right_arc[::-1]))
 
         #Ignoring filtering max_range since only min is of interest here
         min_distance = front_arc[np.where(front_arc >= min_range)].min(initial=3.5)    
 
-        arc_angles = np.arange(-30, 30)
+        arc_angles = np.arange(-45, 45)
         closest_object_position, *rest = arc_angles[np.where(front_arc == min_distance)]
 
         # Identify the open side

@@ -36,6 +36,8 @@ class NavigationServer:
         self.tb3_odom = Tb3Odometry()
         self.tb3_lidar = Tb3LaserScan()
 
+        self.stop_distance = rospy.get_param('~stop_distance', 0.5)
+
     def resultdetection_cb(self, msg):
         """
         Callback for assembly system detection. Updates FSM state based on detection status.
@@ -64,6 +66,12 @@ class NavigationServer:
 
         try:
             while not self.server.is_preempt_requested() and not rospy.is_shutdown():
+                # check collision
+                if self.tb3_lidar.min_distance < self.stop_distance:
+                    rospy.loginfo(f"Potential Collision detected at {self.tb3_lidar.min_distance} m.")
+                    self.set_state(self.STOPPED)
+                    break
+
                 if self.state == self.SCANNING:
                     feedback.status = "Scanning for assembly system."
                     # publish a velocity command to make the robot scanning. velocity set in transition fn.
