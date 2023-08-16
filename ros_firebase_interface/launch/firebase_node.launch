@@ -1,0 +1,6 @@
+<launch>
+    <node name="firebase_node" pkg="ros_firebase_interface" type="firebase_node.py" output="screen">
+        <!-- Set the path to credentials -->
+        <param name="firebase_credentials_path" value="$(find ros_firebase_interface)/config/serviceAccountKey.json"/>
+    </node>
+</launch>
