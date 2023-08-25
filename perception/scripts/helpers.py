@@ -119,7 +119,7 @@ def process_peg_pose_estimator_result(result: Any) -> dict:
 
     # Initialize variables for box and keypoints
     box_xywh = []
-    keypoints_xy = []
+    keypoints_xy = [[],[]]
 
     if detected:
         # Convert tensor to list and extract xywh tensor values

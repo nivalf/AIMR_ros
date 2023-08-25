@@ -6,7 +6,7 @@ from cv_bridge import CvBridge, CvBridgeError
 from sensor_msgs.msg import Image
 from ultralytics import YOLO
 from helpers import process_peg_pose_estimator_result
-from perception.msg import DetectionResult
+from perception.msg import PoseEstimationResult
 
 
 class PegPoseEstimator:
@@ -34,7 +34,7 @@ class PegPoseEstimator:
         self.image_sub = rospy.Subscriber("ez_robot_camera/image_raw", Image, self.callback)
 
         # Publishers for the detection result and image with bounding boxes
-        self.detection_result_pub = rospy.Publisher("peg_pose_estimator/result", DetectionResult, queue_size=1)
+        self.pose_estimation_result_pub = rospy.Publisher("peg_pose_estimator/result", PoseEstimationResult, queue_size=1)
         self.image_with_boxes_pub = rospy.Publisher("peg_pose_estimator/image_with_inference", Image, queue_size=1)
 
     def preprocess_image(self, image):
@@ -57,22 +57,21 @@ class PegPoseEstimator:
             result = results[0]
 
             im_array = result.plot()  # plot a BGR numpy array of predictions
-            detection_result = process_peg_pose_estimator_result(result)
+            pose_estimation_result = process_peg_pose_estimator_result(result)
 
-            rospy.loginfo(f'Detection Result: {detection_result}')
+            rospy.loginfo(f'Detection Result: {pose_estimation_result}')
             rospy.loginfo(f'Detection Result: \n Box Data: {result.boxes.data}  \n Box Data xywh: {result.boxes.xywh} \n Keypoint Data: {result.keypoints.xy}')
 
             # Create the DetectionResult message object
-            detection_result_msg = DetectionResult()
-            # detection_result_msg.detected = detection_result['detected']
-            # detection_result_msg.max_area = detection_result['max_area']
-            # detection_result_msg.num_boxes = detection_result['num_boxes']
-            # detection_result_msg.confidence = detection_result['confidence']
-            # detection_result_msg.percentage_cover = detection_result['percentage_cover']
+            pose_estimation_result_msg = PoseEstimationResult()
+            pose_estimation_result_msg.detected = pose_estimation_result['detected']
+            pose_estimation_result_msg.bounding_box = pose_estimation_result['box_xywh']
+            pose_estimation_result_msg.keypoint_1 = pose_estimation_result['keypoints_xy'][0]
+            pose_estimation_result_msg.keypoint_2 = pose_estimation_result['keypoints_xy'][1]
 
 
             # Publish the detection result
-            self.detection_result_pub.publish(detection_result_msg)
+            self.pose_estimation_result_pub.publish(pose_estimation_result_msg)
             # Publish the image with bounding boxes
             self.image_with_boxes_pub.publish(self.bridge.cv2_to_imgmsg(im_array, "bgr8"))
         except CvBridgeError as e:
