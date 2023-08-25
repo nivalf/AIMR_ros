@@ -4,6 +4,9 @@
     <!-- EZ Command Action Server -->
     <include file="$(find ez_robot_interface)/launch/ez_interface.launch" />
 
+    <!-- Firebase Node -->
+    <include file="$(find ros_firebase_interface)/launch/firebase_node.launch" />
+
 
     <!-- Assembly System Detector -->
     <node pkg="perception" type="assembly_system_detector.py" name="assembly_system_detector" output="screen" required="True">
