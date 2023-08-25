@@ -1,0 +1,12 @@
+<launch>
+    <arg name="model_path" default="$(find perception)/models/peg_pose_estimator.pt" />
+
+
+    <!-- Image Streamer -->
+    <node pkg="perception" type="image_streamer.py" name="image_streamer" output="screen" required="true"/>
+    <!-- Assembly System Detector -->
+    <node pkg="perception" type="peg_pose_estimator.py" name="peg_pose_estimator" output="screen">
+        <param name="model_path" value="$(arg model_path)"/>
+    </node>
+  
+</launch>
