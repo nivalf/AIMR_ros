@@ -5,7 +5,7 @@ import rospy
 from cv_bridge import CvBridge, CvBridgeError
 from sensor_msgs.msg import Image
 from ultralytics import YOLO
-from helpers import process_result
+from helpers import process_peg_pose_estimator_result
 from perception.msg import DetectionResult
 
 
@@ -57,17 +57,18 @@ class PegPoseEstimator:
             result = results[0]
 
             im_array = result.plot()  # plot a BGR numpy array of predictions
-            detection_result = process_result(result)
+            detection_result = process_peg_pose_estimator_result(result)
 
-            rospy.loginfo(f'Detection Result: \n {result.boxes.data}')
+            rospy.loginfo(f'Detection Result: {detection_result}')
+            rospy.loginfo(f'Detection Result: \n Box Data: {result.boxes.data}  \n Box Data xywh: {result.boxes.xywh} \n Keypoint Data: {result.keypoints.xy}')
 
             # Create the DetectionResult message object
             detection_result_msg = DetectionResult()
-            detection_result_msg.detected = detection_result['detected']
-            detection_result_msg.max_area = detection_result['max_area']
-            detection_result_msg.num_boxes = detection_result['num_boxes']
-            detection_result_msg.confidence = detection_result['confidence']
-            detection_result_msg.percentage_cover = detection_result['percentage_cover']
+            # detection_result_msg.detected = detection_result['detected']
+            # detection_result_msg.max_area = detection_result['max_area']
+            # detection_result_msg.num_boxes = detection_result['num_boxes']
+            # detection_result_msg.confidence = detection_result['confidence']
+            # detection_result_msg.percentage_cover = detection_result['percentage_cover']
 
 
             # Publish the detection result
